@@ -108,13 +108,20 @@
     const id = KON.id; api('getKonsulResep', { id: id, rid: rid }).then(r => { if (id !== KON.id) return; box.textContent = ''; if (!r.success) { box.appendChild(el('span', 'kon-ph', 'Resep tidak dapat dimuat.')); return; } box.appendChild(resepCard(r.data)); });
   }
   function refreshResep(rid) { document.querySelectorAll('.kon-rx[data-rid="' + rid + '"]').forEach(b => loadResep(rid, b)); }
+  const BLN = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+  const tglID = x => { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(x || '')); return m ? (+m[3]) + ' ' + BLN[+m[2] - 1] + ' ' + m[1] : String(x || ''); };
   function resepCard(d) {
-    const c = el('div', 'rx' + (d.status !== 'Aktif' ? ' off' : '')); c.appendChild(el('b', 'rx-k', d.klinik || KLINIK_NAMA_)); if (d.alamat) c.appendChild(el('small', null, d.alamat));
-    c.appendChild(el('div', 'rx-t', 'RESEP ' + d.id + (d.status !== 'Aktif' ? ' — ' + d.status.toUpperCase() : ''))); c.appendChild(el('small', null, 'Tanggal: ' + d.tanggal + ' · Pasien: ' + d.nama));
-    const ul = el('ol', 'rx-l'); d.items.forEach(i => { const li = el('li'); li.appendChild(el('b', null, i.obat + '  —  ' + i.jumlah)); li.appendChild(el('div', null, i.aturan)); ul.appendChild(li); }); c.appendChild(ul);
+    const off = d.status !== 'Aktif', c = el('div', 'rx' + (off ? ' off' : ''));
+    if (off) c.appendChild(el('div', 'rx-off', 'RESEP ' + d.status.toUpperCase()));
+    const kop = el('div', 'rx-kop'); const lg = el('img', 'rx-logo'); lg.src = 'assets/logo.jpg'; lg.alt = ''; kop.appendChild(lg);
+    const kt = el('div', 'rx-kt'); kt.appendChild(el('b', 'rx-k', d.klinik || KLINIK_NAMA_)); if (d.alamat) kt.appendChild(el('small', null, d.alamat)); if (d.wa) kt.appendChild(el('small', null, 'WhatsApp: ' + d.wa)); kop.appendChild(kt); c.appendChild(kop); c.appendChild(el('hr', 'rx-hr'));
+    c.appendChild(el('div', 'rx-tg', (d.kota ? d.kota + ', ' : '') + tglID(d.tanggal)));
+    const ls = el('div', 'rx-ls'); d.items.forEach(i => { const it = el('div', 'rx-it'), r1 = el('div', 'rx-r'); r1.appendChild(el('span', 'rx-rx', 'R/')); r1.appendChild(el('span', 'rx-ob', i.obat)); r1.appendChild(el('span', 'rx-no', 'No. ' + i.jumlah)); it.appendChild(r1); const r2 = el('div', 'rx-s2'); r2.appendChild(el('span', 'rx-ss', 'S')); r2.appendChild(el('span', null, i.aturan)); it.appendChild(r2); ls.appendChild(it); }); c.appendChild(ls);
     if (d.catatan) c.appendChild(el('p', 'rx-n', 'Catatan: ' + d.catatan));
-    const sg = el('div', 'rx-s'); if (d.ttd) { const im = el('img'); im.src = d.ttd; im.alt = 'Tanda tangan'; sg.appendChild(im); } sg.appendChild(el('b', null, d.dokter)); sg.appendChild(el('small', null, 'SIP: ' + d.sip)); c.appendChild(sg);
-    c.appendChild(el('small', 'rx-v', 'Kode verifikasi: ' + d.kode));
+    const pro = el('div', 'rx-pro'); pro.appendChild(el('span', 'rx-pl', 'Pro:')); pro.appendChild(el('span', null, d.nama + (d.usia ? ' (' + d.usia + ')' : '') + (d.bb ? ' · BB ' + d.bb + (/kg/i.test(d.bb) ? '' : ' kg') : ''))); c.appendChild(pro);
+    const bt = el('div', 'rx-bt'); bt.appendChild(el('small', 'rx-v', 'Kode: ' + d.kode + ' · ' + d.id));
+    const sg = el('div', 'rx-s'); if (d.ttd) { const im = el('img'); im.src = d.ttd; im.alt = 'Tanda tangan'; sg.appendChild(im); } else sg.appendChild(el('div', 'rx-sp')); sg.appendChild(el('b', 'rx-dn', d.dokter)); sg.appendChild(el('small', null, 'SIP: ' + d.sip)); bt.appendChild(sg); c.appendChild(bt);
+    c.appendChild(el('div', 'rx-foot', 'Resep ini dapat ditebus di klinik Khitan Prime (GRATIS) atau apotek terdekat.'));
     if (d.status === 'Aktif' && isDokter()) { const x = el('button', 'btn-sm btn-red', 'Batalkan resep'); x.type = 'button'; x.addEventListener('click', () => { if (confirm('Batalkan resep ' + d.id + '? Pasien akan melihat resep ini dibatalkan.')) call('konsulResepBatal', { id: KON.id, rid: d.id }, () => { toast('Resep dibatalkan'); KON.idle = 0; clearTimeout(KON.timer); KON.busy = false; fetchThread(false); }); }); c.appendChild(x); }
     return c;
   }
@@ -123,13 +130,14 @@
     api('getProfil', {}).then(r => {
       if (!r.success) return toast(r.message);
       if (!r.data.sip || !r.data.ttd) { toast('Lengkapi nomor SIP dan tanda tangan dulu.'); return konProfil(); }
-      const names = ((S.stok && S.stok.obat) || []).map(x => x.nama || x.Nama).filter(Boolean);
-      const row = () => '<div class="rx-row"><input class="rxO" list="rxList" placeholder="Nama obat & kekuatan" maxlength="100"><input class="rxA" placeholder="Aturan pakai (mis. 3 x 1 sesudah makan)" maxlength="200"><input class="rxJ" placeholder="Jumlah (mis. 10 tablet)" maxlength="40"></div>';
+      const row = () => '<div class="rx-row"><div class="rxOw"><input class="rxO" placeholder="Ketik nama obat (boleh teks bebas)" maxlength="100"></div><input class="rxA" placeholder="Aturan pakai (mis. 3 x 1 sesudah makan)" maxlength="200"><input class="rxJ" placeholder="Jumlah (mis. 10 tablet)" maxlength="40"></div>';
       openM('<h3><i class="bi bi-prescription2"></i> Resep untuk ' + esc(m.nama) + '</h3><p style="font-size:12px;color:var(--mute)">Ditandatangani: <b>' + esc(r.data.nama) + '</b> · SIP ' + esc(r.data.sip) + '. Resep yang terkirim tidak dapat diubah, hanya dibatalkan.</p>' +
-        '<datalist id="rxList">' + names.map(n => '<option value="' + esc(n) + '">').join('') + '</datalist><div id="rxRows">' + row() + '</div>' +
+        '<div id="rxRows">' + row() + '</div>' +
         '<button type="button" class="btn-sm btn-ghost" style="color:var(--ink);margin-top:8px" id="rxAdd"><i class="bi bi-plus-lg"></i> Tambah obat</button><label>Catatan (opsional)</label><textarea id="rxC" rows="2" maxlength="500"></textarea>' +
         '<div class="msg" id="mm"></div><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px"><button class="btn-ghost" style="color:var(--ink)" onclick="closeM()">Batal</button><button id="rxSend"><i class="bi bi-send"></i> Kirim ke pasien</button></div>');
-      $('modalBody').style.maxWidth = '560px'; $('rxAdd').onclick = () => { if (document.querySelectorAll('.rx-row').length < 15) $('rxRows').insertAdjacentHTML('beforeend', row()); };
+      const sugg = () => ((S.stok && S.stok.obat) || []).map(x => ({ id: String(x.id), label: x.nama, sub: Number(x.stok) > 0 ? 'stok ' + x.stok : 'habis', value: x.nama, hay: x.nama }));
+      const bind = rw => { const i = rw.querySelector('.rxO'); window.combo(i, { items: sugg, free: true, onPick: () => rw.querySelector('.rxA').focus() }); };
+      $('modalBody').style.maxWidth = '560px'; bind(document.querySelector('.rx-row')); $('rxAdd').onclick = () => { if (document.querySelectorAll('.rx-row').length < 15) { $('rxRows').insertAdjacentHTML('beforeend', row()); bind($('rxRows').lastElementChild); } };
       $('rxSend').onclick = () => {
         const items = [...document.querySelectorAll('.rx-row')].map(r => ({ obat: r.querySelector('.rxO').value.trim(), aturan: r.querySelector('.rxA').value.trim(), jumlah: r.querySelector('.rxJ').value.trim() })).filter(i => i.obat || i.aturan || i.jumlah);
         if (!items.length) { $('mm').textContent = 'Isi minimal satu obat.'; return; } if (items.some(i => !i.obat || !i.aturan || !i.jumlah)) { $('mm').textContent = 'Nama obat, aturan pakai, dan jumlah wajib diisi pada setiap baris.'; return; }
@@ -145,13 +153,15 @@
   window.konProfil = function konProfil() {
     api('getProfil', {}).then(r => {
       if (!r.success) return toast(r.message); const d = r.data;
-      openM('<h3><i class="bi bi-pen"></i> Profil & Tanda Tangan</h3><p style="font-size:12px;color:var(--mute)">Dipakai pada resep pasien: nama <b>' + esc(d.nama) + '</b>, tanda tangan, dan nomor SIP di bawah nama.</p><label>Nomor SIP</label><input id="pfS" maxlength="40" value="' + esc(d.sip) + '" placeholder="mis. 503/123/SIP-DOK/2025">' +
+      openM('<h3><i class="bi bi-pen"></i> Profil & Tanda Tangan</h3><p style="font-size:12px;color:var(--mute)">Dipakai pada resep pasien: nama <b>' + esc(d.nama) + '</b>, tanda tangan, dan nomor SIP di bawah nama.</p><label>Nomor SIP</label><input id="pfS" maxlength="40" value="' + esc(d.sip) + '" placeholder="mis. 503/123/SIP-DOK/2025"><label>Jabatan (tampil di profil dokter pada HP pasien)</label><input id="pfJ" maxlength="60" value="' + esc(d.jabatan) + '" placeholder="mis. Dokter Umum / Dokter Spesialis Bedah">' +
+        '<label>Foto dokter (opsional)</label><div style="display:flex;gap:10px;align-items:center"><img id="pfFp" alt="Foto dokter" style="width:64px;height:64px;border-radius:50%;object-fit:cover;background:var(--line);' + (d.foto ? '' : 'display:none;') + '" ' + (d.foto ? 'src="' + d.foto + '"' : '') + '><input type="file" id="pfF" accept="image/jpeg,image/png,image/webp"></div>' +
         '<label>Tanda tangan ' + (d.ttd ? '(tersimpan; gambar ulang hanya bila ingin mengganti)' : '(wajib)') + '</label>' + (d.ttd ? '<img id="pfOld" alt="Tanda tangan" style="max-height:60px;background:#fff;border:1px solid var(--line);border-radius:6px;display:block;margin-bottom:6px" src="' + d.ttd + '">' : '') +
         '<div style="border:1.5px solid var(--line);border-radius:8px;background:#fff"><canvas id="pfC" style="width:100%;height:150px;touch-action:none"></canvas></div><div class="msg" id="mm"></div>' +
         '<div style="display:flex;gap:8px;justify-content:space-between;margin-top:10px"><button class="btn-ghost btn-sm" style="color:var(--ink)" id="pfX"><i class="bi bi-eraser"></i> Hapus</button><span><button class="btn-ghost" style="color:var(--ink)" onclick="closeM()">Batal</button> <button id="pfOk">Simpan</button></span></div>');
       let pad = null; setTimeout(() => { const c = $('pfC'), k = Math.max(window.devicePixelRatio || 1, 1); c.width = c.offsetWidth * k; c.height = c.offsetHeight * k; c.getContext('2d').scale(k, k); pad = new SignaturePad(c, { penColor: 'rgb(15,23,42)' }); }, 60);
-      $('pfX').onclick = () => pad && pad.clear();
-      $('pfOk').onclick = () => { const draw = pad && !pad.isEmpty(); if (!d.ttd && !draw) { $('mm').textContent = 'Mohon bubuhkan tanda tangan.'; return; } call('saveProfil', { sip: $('pfS').value, ttd: draw ? pad.toDataURL('image/png') : undefined }, () => { closeM(); toast('Profil tersimpan'); }, e => $('mm').textContent = e); };
+      $('pfX').onclick = () => pad && pad.clear(); let fotoBaru = '';
+      $('pfF').onchange = async () => { const f = $('pfF').files[0]; fotoBaru = ''; if (!f) return; if (!/^image\/(jpeg|png|webp)$/.test(f.type)) { $('mm').textContent = 'Foto harus JPG, PNG, atau WebP.'; $('pfF').value = ''; return; } try { fotoBaru = await shrink(f, 480, 400000); $('pfFp').src = fotoBaru; $('pfFp').style.display = ''; $('mm').textContent = ''; } catch (e) { $('mm').textContent = 'Foto tidak dapat diproses.'; } };
+      $('pfOk').onclick = () => { const draw = pad && !pad.isEmpty(); if (!d.ttd && !draw) { $('mm').textContent = 'Mohon bubuhkan tanda tangan.'; return; } call('saveProfil', { sip: $('pfS').value, jabatan: $('pfJ').value, foto: fotoBaru || undefined, ttd: draw ? pad.toDataURL('image/png') : undefined }, () => { closeM(); toast('Profil tersimpan'); }, e => $('mm').textContent = e); };
     });
   };
   window.konTpl = function () {
@@ -171,11 +181,12 @@
       const im = el('img'); im.alt = 'Foto'; im.src = url; im.addEventListener('click', () => { const z = el('div', 'kon-zoom'); const zi = el('img'); zi.src = url; z.appendChild(zi); z.addEventListener('click', () => z.remove()); document.body.appendChild(z); }); ph.replaceWith(im);
     } catch (e) { ph.textContent = 'Foto tidak dapat dimuat.'; }
   }
-  function shrink(file) {
+  function shrink(file, maxDim, maxLen) {
+    maxDim = maxDim || 1280; maxLen = maxLen || 850000;
     return new Promise((res, rej) => { const u = URL.createObjectURL(file), im = new Image();
-      im.onload = () => { URL.revokeObjectURL(u); let w = im.naturalWidth, h = im.naturalHeight; const k = Math.min(1, 1280 / Math.max(w, h)); w = Math.round(w * k); h = Math.round(h * k);
+      im.onload = () => { URL.revokeObjectURL(u); let w = im.naturalWidth, h = im.naturalHeight; const k = Math.min(1, maxDim / Math.max(w, h)); w = Math.round(w * k); h = Math.round(h * k);
         const c = document.createElement('canvas'); c.width = w; c.height = h; const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, w, h); x.drawImage(im, 0, 0, w, h);
-        let q = .82, out = c.toDataURL('image/jpeg', q); while (out.length > 850000 && q > .35) { q -= .1; out = c.toDataURL('image/jpeg', q); } out.length > 850000 ? rej(0) : res(out); };
+        let q = .82, out = c.toDataURL('image/jpeg', q); while (out.length > maxLen && q > .35) { q -= .1; out = c.toDataURL('image/jpeg', q); } out.length > maxLen ? rej(0) : res(out); };
       im.onerror = () => { URL.revokeObjectURL(u); rej(0); }; im.src = u; });
   }
   function kirim(ta, pv, file) {
