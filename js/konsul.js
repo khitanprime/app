@@ -8,7 +8,9 @@
   SRC.kon = { a: 'getKonsulList', d: () => ({ cab: S.cab }), ok: d => { S.kon = d; konRender(); konBadge(); } };
 
   const el = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
-  const linkOf = kode => String(KONSUL_URL).replace(/\/?$/, '/') + '?k=' + encodeURIComponent(kode);
+  // Alamat halaman pasien: dari config.js (KONSUL_URL) bila ada; bila baris itu belum ditambahkan, pakai bawaan ini (tidak boleh membuat tombol mati)
+  const KURL = (typeof KONSUL_URL !== 'undefined' && KONSUL_URL) || 'https://shancare.github.io/khitanprime/';
+  const linkOf = kode => String(KURL).replace(/\/?$/, '/') + '?k=' + encodeURIComponent(kode);
   const jam = ms => new Date(ms).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
   const tgl = ms => { const d = new Date(ms), n = new Date(); return d.toDateString() === n.toDateString() ? jam(ms) : d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }); };
   const hari = ms => new Date(ms).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
@@ -193,7 +195,8 @@
   window.konOpen = function (bookingId) {
     const b = S.bk.filter(x => x.ID === bookingId)[0]; if (!b) return;
     if (b.Status !== 'Selesai') return toast('Konsultasi pasca khitan hanya untuk pasien yang sudah diproses.');
-    call('konsulLink', { id: bookingId }, d => {
+    toast('Menyiapkan tautan…');
+    call('konsulLink', { id: bookingId }, d => { try {
       if (d.selesai) {
         openM('<h3><i class="bi bi-chat-dots"></i> Konsultasi Pasca Khitan — ' + esc(d.nama) + '</h3><p style="margin:8px 0">Konsultasi pasien ini sudah <b>diselesaikan</b>; tautan lamanya tidak aktif.</p>' +
           (isOwner() ? '<p style="font-size:12px;color:var(--mute)">Owner dapat membuka kembali bila diperlukan (foto yang sudah dihapus tidak kembali).</p><button class="btn-sm btn-navy" id="konRe"><i class="bi bi-unlock"></i> Buka kembali</button> ' : '') +
@@ -211,7 +214,7 @@
       $('konCp').onclick = () => salin(l, 'Tautan disalin.'); if (wl) $('konWa').onclick = () => window.open(wl + '?text=' + encodeURIComponent(waTeks(m)), '_blank', 'noopener');
       $('konGo').onclick = () => { closeM(); nav('kon'); konBuka(bookingId); };
       pull(['kon'], true);
-    });
+    } catch (e) { console.error(e); toast('Terjadi kesalahan: ' + (e && e.message || e)); } });
   };
   // tombol percakapan di daftar Pasien Diproses (hanya pasien berstatus Selesai)
   const _wa = waBtn; waBtn = function (b) { return _wa(b) + (b.Status === 'Selesai' ? '<button class="ic btn-ghost" style="color:var(--ink)" onclick="konOpen(\'' + esc(b.ID) + '\')" aria-label="Konsultasi pasca khitan" title="Konsultasi pasca khitan"><i class="bi bi-chat-dots"></i></button>' : ''); };
