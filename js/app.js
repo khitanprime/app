@@ -255,7 +255,7 @@ function loadBk(force) {
   else { $('tB').innerHTML = $('tP').innerHTML = '<tr><td colspan="6"><div class="skel"></div></td></tr>'; }
   pull(['bk'], force);
 }
-const waBtn = b => { const l = waLink(b.NoHP);
+let waBtn = b => { const l = waLink(b.NoHP);
   return l ? '<a class="btn btn-wa ic" target="_blank" rel="noopener" href="' + l + '" aria-label="WhatsApp ' + esc(b.NamaAnak) + '" title="Chat WhatsApp"><i class="bi bi-whatsapp"></i></a>' : '<button class="ic off" disabled aria-label="Nomor kosong" title="Nomor HP kosong/tidak valid"><i class="bi bi-whatsapp"></i></button>'; };
 const moreBtn = id => '<button class="ic btn-ghost" style="color:var(--ink)" onclick="mAksi(\'' + id + '\')" aria-label="Aksi lainnya" title="Aksi lainnya"><i class="bi bi-three-dots-vertical"></i></button>';
 const aksiBtn = (ic, label, fn, cls) => '<button class="' + (cls || 'btn-ghost') + '" style="width:100%;justify-content:flex-start;margin-top:8px;' + (cls ? '' : 'color:var(--ink)') + '" onclick="' + fn + '"><i class="bi ' + ic + '"></i> ' + label + '</button>';
@@ -460,7 +460,7 @@ function doStaff(i) {
 function delStaff(i) { const x = S.stfG[i]; if (!confirm('Hapus ' + x.Nama + ' (' + x.roles.join(', ') + ') dari semua cabang?')) return; call('hapusStaff', [x.Nama, x.roles], () => { toast('Staf dihapus'); pull(['stf', 'boot'], true); }); }
 function mUser(un) {
   const u = S.stf.users.filter(y => y.Username === un)[0] || {};
-  openM('<h3>' + (un ? 'Edit' : 'Tambah') + ' Akun</h3><label>Username</label><input id="uU" value="' + esc(u.Username || '') + '"><label>Nama</label><input id="uN" value="' + esc(u.Nama || '') + '"><label>Role</label>' + selOpt('uR', ['Petugas', 'Owner'], u.Role) +
+  openM('<h3>' + (un ? 'Edit' : 'Tambah') + ' Akun</h3><label>Username</label><input id="uU" value="' + esc(u.Username || '') + '"><label>Nama</label><input id="uN" value="' + esc(u.Nama || '') + '"><label>Role</label>' + selOpt('uR', ['Petugas', 'Dokter', 'Owner'], u.Role) +
     cabSel('uC', u.CabangID) + '<small style="color:var(--mute)">Cabang diabaikan untuk Owner.</small><label>' + (un ? 'Password baru (kosongkan jika tidak diganti; WAJIB diisi jika username diubah)' : 'Password (min. 6 karakter)') + '</label><input type="password" id="uP" autocomplete="new-password">' + btnRow("doUser('" + un + "')"));
 }
 function doUser(un) {

@@ -39,11 +39,13 @@
     <button class="nav" data-s="booking" onclick="nav('booking')"><i class="bi bi-calendar-check"></i> Pasien Booking</button>
     <button class="nav" data-s="proses" onclick="nav('proses')"><i class="bi bi-clipboard2-pulse"></i> Pasien Diproses</button>
     <button class="nav" data-s="stok" onclick="nav('stok')"><i class="bi bi-capsule"></i> Stok Obat &amp; BHP</button>
+    <button class="nav" data-s="kon" onclick="nav('kon')"><i class="bi bi-chat-dots"></i> Konsultasi Pasca Khitan <span id="konBadge" class="nbadge hide">0</span></button>
     <button class="nav" data-s="hv" onclick="nav('hv')"><i class="bi bi-house-heart"></i> Homevisite</button>
     <button class="nav" data-s="keu" onclick="nav('keu')"><i class="bi bi-cash-coin"></i> Keuangan</button>
     <button class="nav" data-s="lap" onclick="nav('lap')"><i class="bi bi-bar-chart-line"></i> Laporan</button>
     <button class="nav hide" id="navMaster" data-s="master" onclick="nav('master')"><i class="bi bi-buildings"></i> Cabang &amp; Paket</button>
     <button class="nav hide" id="navStaff" data-s="staff" onclick="nav('staff')"><i class="bi bi-people"></i> Staff &amp; Akun</button>
+    <button class="nav hide" id="navProfil" onclick="konProfil()"><i class="bi bi-pen"></i> Profil &amp; TTD Dokter</button>
     <button class="nav" onclick="toggleTheme()"><i class="bi bi-moon-stars"></i> Mode gelap</button>
     <button class="nav" style="margin-top:auto;color:var(--red)" onclick="doLogout()"><i class="bi bi-box-arrow-right"></i> Keluar</button>
   </aside>
@@ -115,6 +117,11 @@
       <div class="card"><div style="display:flex;justify-content:space-between"><h3><i class="bi bi-person-badge"></i> Dokter, Asisten, Petugas Close Deal</h3><button class="btn-sm" onclick="mStaff('')"><i class="bi bi-plus-lg"></i> Tambah</button></div><p style="color:var(--mute);margin:4px 0">Nama yang muncul di dropdown. Satu orang di beberapa peran = tambahkan beberapa kali.</p><div class="tw"><table><thead><tr><th>Nama</th><th>Peran</th><th>Cabang</th><th></th></tr></thead><tbody id="sfT"></tbody></table></div></div>
       <div class="card"><div style="display:flex;justify-content:space-between"><h3><i class="bi bi-key"></i> Akun login</h3><button class="btn-sm" onclick="mUser('')"><i class="bi bi-plus-lg"></i> Tambah</button></div><div class="tw"><table><thead><tr><th>Username</th><th>Nama</th><th>Role</th><th>Cabang</th><th></th></tr></thead><tbody id="usT"></tbody></table></div></div>
     </section>
+<section id="s-kon" class="sec-app"><h1><i class="bi bi-chat-dots"></i> Konsultasi Pasca Khitan <button id="konTplBtn" class="btn-sm btn-ghost hide" style="color:var(--ink);margin-left:8px;vertical-align:middle" onclick="konTpl()"><i class="bi bi-chat-square-text"></i> Pesan penutup</button></h1>
+  <div id="konWrap" class="kon">
+    <div class="card kon-l"><input id="qKon" type="search" placeholder="Cari nama anak / orang tua…" aria-label="Cari percakapan"><div id="konList"></div></div>
+    <div class="card kon-r"><div id="konThread"><p class="kon-empty">Pilih percakapan di sebelah kiri.</p></div></div>
+  </div></section>
 <section id="s-hv" class="sec-app"><h1><i class="bi bi-house-heart"></i> Homevisite</h1>
       <div class="card"><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;margin-bottom:10px"><div style="flex:1;min-width:140px"><label style="margin-top:0">Dari</label><input type="date" id="fhD" onchange="renderHv()"></div><div style="flex:1;min-width:140px"><label style="margin-top:0">Sampai</label><input type="date" id="fhS" onchange="renderHv()"></div><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn-sm btn-ghost" style="color:var(--ink)" onclick="clearRange('fh')"><i class="bi bi-x-circle"></i> Tampilkan Semua</button> <button class="btn-sm btn-ghost" style="color:var(--ink)" onclick="setMonth('fh')"><i class="bi bi-calendar-month"></i> Bulan Ini</button></div></div><div style="display:flex;gap:8px"><input id="qH" placeholder="Cari pasien / petugas..." oninput="renderHv()"><button style="white-space:nowrap" onclick="mHv()"><i class="bi bi-plus-lg"></i> Tambah</button></div>
         <div class="tw" style="margin-top:8px"><table><thead><tr><th>Tanggal</th><th>Pasien</th><th>Alamat</th><th>Petugas</th><th></th></tr></thead><tbody id="tH"></tbody></table></div></div></section>
@@ -144,5 +151,6 @@
 <script defer src="js/config.js?v=4.0.0"></script>
 <script defer src="js/api.js?v=4.0.0"></script>
 <script defer src="js/app.js?v=4.0.0"></script>
+<script defer src="js/konsul.js?v=4.0.0"></script>
 </body>
 </html>
