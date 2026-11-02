@@ -9,7 +9,7 @@
 
   const el = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
   // Alamat halaman pasien: dari config.js (KONSUL_URL) bila ada; bila baris itu belum ditambahkan, pakai bawaan ini (tidak boleh membuat tombol mati)
-  const KURL = (typeof KONSUL_URL !== 'undefined' && KONSUL_URL) || 'https://shancare.github.io/khitanprime/';
+  const KURL = (typeof KONSUL_URL !== 'undefined' && KONSUL_URL) || 'https://http://khitanprime.github.io/konsultasi/';
   const linkOf = kode => String(KURL).replace(/\/?$/, '/') + '?k=' + encodeURIComponent(kode);
   const jam = ms => new Date(ms).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
   const tgl = ms => { const d = new Date(ms), n = new Date(); return d.toDateString() === n.toDateString() ? jam(ms) : d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }); };
