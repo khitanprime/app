@@ -27,12 +27,24 @@
   function bagianBot() {
     const c = card('Bot Telegram', 'bi-robot'), cf = T.cfg;
     if (cf.aktif) {
-      c.appendChild(p('Tersambung: @' + cf.bot + (cf.webhook ? ' · webhook terpasang' : ' · webhook belum terpasang')));
+      const cepat = cf.mode === 'relay';
+      c.appendChild(p('Tersambung: @' + cf.bot + (cepat ? ' · koneksi cepat (relay Cloudflare), balasan 1–3 detik' : cf.webhook ? ' · mode 1 menit (pesan dicek tiap 1 menit)' : ' · koneksi belum aktif')));
       const r = el('div'); r.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;margin-top:8px';
-      r.appendChild(btn('Pasang ulang webhook', 'bi-arrow-repeat', async () => { const x = await api('tgPasang', {}); if (!x.success) return gagal(x); toast('Webhook dipasang. Antrean: ' + x.data.pending + (x.data.error ? ' · Catatan Telegram: ' + x.data.error : '')); muat(); }, 'btn-ghost'));
+      if (cepat) r.appendChild(btn('Kembali ke mode 1 menit', 'bi-arrow-repeat', async () => { const x = await api('tgPasang', {}); if (!x.success) return gagal(x); toast('Mode 1 menit aktif.'); muat(); }, 'btn-ghost'));
+      else r.appendChild(btn(cf.webhook ? 'Pasang ulang koneksi' : 'Aktifkan mode 1 menit', 'bi-arrow-repeat', async () => { const x = await api('tgPasang', {}); if (!x.success) return gagal(x); toast('Koneksi dipasang.'); muat(); }, 'btn-ghost'));
+      r.appendChild(btn('Cek status', 'bi-activity', async () => { const x = await api('tgStatus', {}); if (!x.success) return gagal(x); toast('Mode: ' + (x.data.mode === 'relay' ? 'cepat' : '1 menit') + (x.data.error ? ' · Catatan Telegram: ' + x.data.error : ' · tidak ada error')); }, 'btn-ghost'));
       r.appendChild(btn('Ganti token', 'bi-key', () => { cf.aktif = false; cf.ganti = true; tampil(); }, 'btn-ghost'));
       r.appendChild(btn('Lepas bot', 'bi-x-circle', async () => { if (!confirm('Lepas bot Telegram? Notifikasi berhenti sampai bot dipasang lagi.')) return; const x = await api('tgHapusBot', {}); if (!x.success) return gagal(x); toast('Bot dilepas.'); muat(); }, 'btn-red'));
-      c.appendChild(r); return c;
+      c.appendChild(r);
+      const f = el('div'); f.style.cssText = 'border-top:1px solid var(--line);margin-top:12px;padding-top:10px';
+      f.appendChild(el('b', null, 'Koneksi cepat (Cloudflare Workers, gratis)'));
+      f.appendChild(p(cepat ? 'Aktif: ' + cf.relay : '1) Klik "Salin skrip relay". 2) Di dash.cloudflare.com buat Worker, tempel skrip, Deploy. 3) Tempel alamat Worker (…workers.dev) di bawah lalu klik Pasang. Langkah rinci ada di PANDUAN 5.5c.', 'color:var(--mute);font-size:13px'));
+      const fr = el('div'); fr.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;margin-top:6px';
+      fr.appendChild(btn('Salin skrip relay', 'bi-clipboard', async () => { try { const t = await (await fetch('js/relay-worker.txt', { cache: 'no-store' })).text(); const isi = t.replace('__GAS_URL__', String(GAS_URL).replace(/'/g, '')); try { await navigator.clipboard.writeText(isi); toast('Skrip relay disalin. Tempel di Cloudflare.'); } catch (e) { const a = el('textarea'); a.value = isi; document.body.appendChild(a); a.select(); document.execCommand('copy'); a.remove(); toast('Skrip relay disalin.'); } } catch (e) { toast('Gagal mengambil skrip relay.'); } }, 'btn-ghost'));
+      c.appendChild(f); f.appendChild(fr);
+      if (!cepat) { const u = el('input'); u.type = 'url'; u.placeholder = 'https://nama.akunanda.workers.dev'; u.setAttribute('aria-label', 'Alamat Worker'); u.style.marginTop = '8px'; f.appendChild(u); const mm = p('', 'color:var(--red,#b91c1c);font-size:12px'); f.appendChild(mm);
+        const b = btn('Pasang koneksi cepat', 'bi-lightning-charge', async () => { mm.textContent = ''; const x = await api('tgPasangRelay', { url: u.value.trim() }); if (!x.success) { mm.textContent = x.message || 'Gagal.'; if (x.code === 'AUTH') gagal(x); return; } toast(x.message); muat(); }); b.style.marginTop = '8px'; f.appendChild(b); }
+      return c;
     }
     c.appendChild(p('1) Di Telegram buka @BotFather → kirim /newbot → ikuti langkahnya. 2) Salin token yang diberikan lalu tempel di bawah.', 'color:var(--mute);font-size:13px'));
     const i = el('input'); i.type = 'password'; i.placeholder = '123456789:AAE…'; i.autocomplete = 'off'; i.setAttribute('aria-label', 'Token bot'); c.appendChild(i);

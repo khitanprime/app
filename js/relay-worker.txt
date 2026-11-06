@@ -1,0 +1,20 @@
+// Relay Telegram -> Apps Script (Khitan Prime). Menjawab Telegram dengan 200 lalu meneruskan pesan ke Apps Script.
+const GAS = '__GAS_URL__';
+
+export default {
+  async fetch(req, env, ctx) {
+    if (req.method !== 'POST') return new Response('khitan-relay ok');
+    const tg = new URL(req.url).searchParams.get('tg') || '';
+    if (!/^[a-z0-9]{16,40}$/.test(tg)) return new Response('forbidden', { status: 403 });
+    const body = await req.text();
+    ctx.waitUntil((async () => {
+      for (let i = 0; i < 2; i++) {
+        try {
+          const r = await fetch(GAS + '?tg=' + tg, { method: 'POST', body, redirect: 'follow', headers: { 'content-type': 'text/plain;charset=utf-8' } });
+          if (r.status < 500) return;
+        } catch (e) {}
+      }
+    })());
+    return new Response('ok');
+  }
+};
