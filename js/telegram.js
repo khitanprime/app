@@ -4,7 +4,7 @@
 // ============================================================
 (function () {
   'use strict';
-  const T = { cfg: null, saya: null, kode: {}, busy: false };
+  const T = { cfg: null, saya: null, push: null, kode: {}, busy: false };
   const el = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
   const btn = (txt, ic, fn, cls) => { const b = el('button', 'btn-sm ' + (cls || '')); const i = el('i', 'bi ' + ic); b.appendChild(i); b.appendChild(document.createTextNode(' ' + txt)); b.onclick = fn; return b; };
   const card = (judul, ic) => { const c = el('div', 'card'), h = el('h3'); h.appendChild(el('i', 'bi ' + ic)); h.appendChild(document.createTextNode(' ' + judul)); c.appendChild(h); return c; };
@@ -12,16 +12,50 @@
   const kodeBox = (kode, cmd, menit) => { const d = el('div'); d.style.cssText = 'margin:10px 0;padding:12px;border:1px dashed var(--line);border-radius:12px;background:var(--bg,transparent)'; d.appendChild(p('Kirim pesan ini di Telegram (berlaku ' + menit + ' menit):', 'color:var(--mute);font-size:12px')); const c = el('code', null, cmd + ' ' + kode); c.style.cssText = 'font-size:20px;font-weight:700;letter-spacing:1px'; d.appendChild(c); return d; };
   const gagal = r => { if (r && (r.code === 'AUTH' || /Sesi berakhir/.test(r.message || ''))) authLost(r.message); else toast((r && r.message) || 'Gagal.'); };
 
+
+  const b64u = buf => btoa(String.fromCharCode.apply(null, new Uint8Array(buf))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  async function salinSkrip() {
+    try {
+      const t = await (await fetch('js/relay-worker.txt', { cache: 'no-store' })).text(), pc = T.push && T.push.siap ? T.push : null, kurl = (typeof KONSUL_URL !== 'undefined' && KONSUL_URL) || 'https://khitanprime.github.io/pasien/';
+      let isi = t.replace('__GAS_URL__', String(GAS_URL).replace(/'/g, ''));
+      if (pc) isi = isi.replace('__PUSH_KEY__', pc.key).replace('__VAPID_PUB__', pc.pub).replace('__VAPID_JWK__', pc.jwk).replace('__VAPID_SUB__', String(kurl).replace(/'/g, ''));
+      try { await navigator.clipboard.writeText(isi); } catch (e) { const a = el('textarea'); a.value = isi; document.body.appendChild(a); a.select(); document.execCommand('copy'); a.remove(); }
+      toast(pc ? 'Skrip relay (dengan push) disalin. Tempel di Cloudflare lalu Deploy.' : 'Skrip relay disalin. Tempel di Cloudflare lalu Deploy.');
+    } catch (e) { toast('Gagal mengambil skrip relay.'); }
+  }
+  function bagianPush() {
+    const c = card('Push notifikasi ke pasien', 'bi-bell'), pc = T.push;
+    c.appendChild(p('Pasien yang mengaktifkan notifikasi di halaman konsultasi diberi tahu "Ada balasan dari Khitan Prime" setiap staf membalas atau konsultasi ditutup. Isi pesan tidak ikut dikirim. Memakai Worker Cloudflare yang sama dengan koneksi cepat.', 'color:var(--mute);font-size:13px'));
+    const r = el('div'); r.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;margin-top:8px';
+    if (!pc.siap) {
+      c.appendChild(p('Langkah 1 dari 3: siapkan kunci (dibuat di browser ini, hanya sekali).', 'font-size:13px'));
+      r.appendChild(btn('Siapkan kunci push', 'bi-shield-lock', async () => {
+        try { const kp = await crypto.subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign', 'verify']); const jwk = await crypto.subtle.exportKey('jwk', kp.privateKey), pub = b64u(await crypto.subtle.exportKey('raw', kp.publicKey));
+          const x = await api('pushSiapkan', { pub: pub, jwk: { kty: jwk.kty, crv: jwk.crv, d: jwk.d, x: jwk.x, y: jwk.y } }); if (!x.success) return gagal(x); toast(x.message); muat(); } catch (e) { toast('Browser ini tidak mendukung pembuatan kunci. Coba Chrome terbaru.'); }
+      }));
+      c.appendChild(r); return c;
+    }
+    c.appendChild(el('span', 'badge ' + (pc.aktif ? 'b-ok' : 'b-wait'), pc.aktif ? 'Aktif · ' + pc.perangkat + ' perangkat pasien terdaftar' : 'Kunci siap, belum aktif'));
+    c.lastChild.style.cssText = 'display:inline-block;margin:6px 0';
+    if (!pc.aktif) c.appendChild(p('Langkah 2: klik "Salin skrip relay" lalu tempel di Worker Cloudflare (Edit code, ganti seluruh isi, Deploy). Langkah 3: tempel alamat Worker di bawah lalu Aktifkan.', 'font-size:13px;color:var(--mute)'));
+    r.appendChild(btn('Salin skrip relay', 'bi-clipboard', salinSkrip, 'btn-ghost'));
+    if (pc.aktif) r.appendChild(btn('Matikan push', 'bi-bell-slash', async () => { const x = await api('pushMatikan', {}); if (!x.success) return gagal(x); toast(x.message); muat(); }, 'btn-red'));
+    c.appendChild(r);
+    if (!pc.aktif) { const u = el('input'); u.type = 'url'; u.id = 'pushUrl'; u.value = pc.url || ''; u.placeholder = 'https://khitan-relay.akunanda.workers.dev'; u.setAttribute('aria-label', 'Alamat Worker untuk push'); u.style.marginTop = '8px'; c.appendChild(u); const mm = p('', 'color:var(--red,#b91c1c);font-size:12px'); c.appendChild(mm);
+      const b = btn('Aktifkan push', 'bi-bell', async () => { mm.textContent = ''; const x = await api('pushAktifkan', { url: u.value.trim() }); if (!x.success) { mm.textContent = x.message || 'Gagal.'; if (x.code === 'AUTH') gagal(x); return; } toast(x.message); muat(); }); b.style.marginTop = '8px'; c.appendChild(b); }
+    return c;
+  }
   async function muat() {
     const w = $('tgWrap'); if (!w) return;
     const rs = await api('getTgSaya', {}); if (!rs.success) { gagal(rs); return; } T.saya = rs.data;
-    if (isOwner()) { const rc = await api('getTgCfg', {}); if (rc.success) T.cfg = rc.data; else { gagal(rc); return; } }
+    if (isOwner()) { const rp = await api('getPushCfg', {}); if (rp.success) T.push = rp.data; const rc = await api('getTgCfg', {}); if (rc.success) T.cfg = rc.data; else { gagal(rc); return; } }
     tampil();
   }
   function tampil() {
     const w = $('tgWrap'); if (!w) return; w.textContent = '';
     if (isOwner()) w.appendChild(bagianBot());
     if (isOwner() && T.cfg && T.cfg.aktif) w.appendChild(bagianGrup());
+    if (isOwner() && T.push) w.appendChild(bagianPush());
     w.appendChild(bagianSaya());
   }
   function bagianBot() {
@@ -40,7 +74,7 @@
       f.appendChild(el('b', null, 'Koneksi cepat (Cloudflare Workers, gratis)'));
       f.appendChild(p(cepat ? 'Aktif: ' + cf.relay : '1) Klik "Salin skrip relay". 2) Di dash.cloudflare.com buat Worker, tempel skrip, Deploy. 3) Tempel alamat Worker (…workers.dev) di bawah lalu klik Pasang. Langkah rinci ada di PANDUAN 5.5c.', 'color:var(--mute);font-size:13px'));
       const fr = el('div'); fr.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;margin-top:6px';
-      fr.appendChild(btn('Salin skrip relay', 'bi-clipboard', async () => { try { const t = await (await fetch('js/relay-worker.txt', { cache: 'no-store' })).text(); const isi = t.replace('__GAS_URL__', String(GAS_URL).replace(/'/g, '')); try { await navigator.clipboard.writeText(isi); toast('Skrip relay disalin. Tempel di Cloudflare.'); } catch (e) { const a = el('textarea'); a.value = isi; document.body.appendChild(a); a.select(); document.execCommand('copy'); a.remove(); toast('Skrip relay disalin.'); } } catch (e) { toast('Gagal mengambil skrip relay.'); } }, 'btn-ghost'));
+      fr.appendChild(btn('Salin skrip relay', 'bi-clipboard', salinSkrip, 'btn-ghost'));
       c.appendChild(f); f.appendChild(fr);
       if (!cepat) { const u = el('input'); u.type = 'url'; u.placeholder = 'https://nama.akunanda.workers.dev'; u.setAttribute('aria-label', 'Alamat Worker'); u.style.marginTop = '8px'; f.appendChild(u); const mm = p('', 'color:var(--red,#b91c1c);font-size:12px'); f.appendChild(mm);
         const b = btn('Pasang koneksi cepat', 'bi-lightning-charge', async () => { mm.textContent = ''; const x = await api('tgPasangRelay', { url: u.value.trim() }); if (!x.success) { mm.textContent = x.message || 'Gagal.'; if (x.code === 'AUTH') gagal(x); return; } toast(x.message); muat(); }); b.style.marginTop = '8px'; f.appendChild(b); }

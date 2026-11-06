@@ -1,10 +1,40 @@
-// Relay Telegram -> Apps Script (Khitan Prime). Menjawab Telegram dengan 200 lalu meneruskan pesan ke Apps Script.
+// Relay Khitan Prime (Cloudflare Worker): (1) Telegram -> Apps Script, (2) Push notifikasi ke pasien (Web Push, VAPID).
 const GAS = '__GAS_URL__';
+const PUSH_KEY = '__PUSH_KEY__';
+const VAPID_PUB = '__VAPID_PUB__';
+const VAPID_JWK = '__VAPID_JWK__';
+const VAPID_SUB = '__VAPID_SUB__';
+const PUSH_OK = !/^__/.test(PUSH_KEY) && !/^__/.test(VAPID_PUB) && !/^__/.test(VAPID_JWK);
+const PUSH_HOST = /^https:\/\/([a-z0-9-]+\.)*(googleapis\.com|push\.services\.mozilla\.com|push\.apple\.com|notify\.windows\.com)\//i;
+
+const b64u = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+const enc = (o) => b64u(new TextEncoder().encode(JSON.stringify(o)));
+let KEY;
+async function jwt(aud) {
+  KEY = KEY || await crypto.subtle.importKey('jwk', JSON.parse(VAPID_JWK), { name: 'ECDSA', namedCurve: 'P-256' }, false, ['sign']);
+  const data = enc({ typ: 'JWT', alg: 'ES256' }) + '.' + enc({ aud, exp: Math.floor(Date.now() / 1000) + 43200, sub: VAPID_SUB });
+  const sig = await crypto.subtle.sign({ name: 'ECDSA', hash: 'SHA-256' }, KEY, new TextEncoder().encode(data));
+  return data + '.' + b64u(sig);
+}
+async function push(endpoint) {
+  if (!PUSH_HOST.test(endpoint)) return 400;
+  try {
+    const r = await fetch(endpoint, { method: 'POST', headers: { Authorization: 'vapid t=' + await jwt(new URL(endpoint).origin) + ', k=' + VAPID_PUB, TTL: '86400', Urgency: 'high', 'Content-Length': '0' } });
+    return r.status;
+  } catch (e) { return 0; }
+}
 
 export default {
   async fetch(req, env, ctx) {
-    if (req.method !== 'POST') return new Response('khitan-relay ok');
-    const tg = new URL(req.url).searchParams.get('tg') || '';
+    const u = new URL(req.url);
+    if (req.method !== 'POST') return new Response(u.searchParams.get('cek') === 'push' && PUSH_OK ? 'khitan-relay push-ok' : 'khitan-relay ok');
+    if (u.pathname === '/push') { // dipanggil Apps Script
+      if (!PUSH_OK || u.searchParams.get('k') !== PUSH_KEY) return new Response('forbidden', { status: 403 });
+      let subs = []; try { subs = (await req.json()).subs || []; } catch (e) {}
+      const r = await Promise.all(subs.slice(0, 10).map(push));
+      return new Response(JSON.stringify({ r }), { headers: { 'content-type': 'application/json' } });
+    }
+    const tg = u.searchParams.get('tg') || ''; // Telegram
     if (!/^[a-z0-9]{16,40}$/.test(tg)) return new Response('forbidden', { status: 403 });
     const body = await req.text();
     ctx.waitUntil((async () => {
