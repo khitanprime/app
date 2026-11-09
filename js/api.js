@@ -29,7 +29,8 @@ const ARGS = {
   pelunasan: ['id', 'metode'], deleteBooking: ['id'], addStok: ['cab', 'tipe', 'nama', 'awal'], ubahStok: ['tipe', 'id', 'aksi', 'jml'], hapusStok: ['tipe', 'id'],
   addPengeluaran: ['cab', 'tgl', 'ket', 'jml'], hapusPengeluaran: ['id'], addHomevisit: ['cab', 'o'], hapusHomevisit: ['id'],
   saveTtd: ['id', 'dataUrl'], cetak: ['id', 'jenis'], saveCabang: ['o'], savePaket: ['o'], saveStaff: ['o'], hapusStaff: ['nama', 'role'],
-  saveUser: ['o', 'baru'], hapusUser: ['username']
+  saveUser: ['o', 'baru'], hapusUser: ['username'],
+  koreksiDP: '*', ajukanKoreksiDP: '*', putusKoreksiDP: '*', batalKoreksiDP: '*', getKoreksiDP: ['cab']
 };
 function toData(action, args) {
   if (!Array.isArray(args)) return args || {};
