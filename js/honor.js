@@ -21,6 +21,7 @@
     const ac = el('div'); ac.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap;align-items:center';
     const m = el('input'); m.type = 'month'; m.id = 'hfBln'; m.value = H.bln || (d && d.bulan) || ym(); m.style.maxWidth = '170px'; m.onchange = () => { H.bln = m.value; pull(['hf'], true); }; ac.appendChild(m);
     if (d && d.daftar.length) { const ex = el('button', 'btn-sm btn-ghost', 'Ekspor Excel'); ex.id = 'hfEks'; ex.style.color = 'var(--ink)'; ex.onclick = ekspor; ac.appendChild(ex); }
+    if (own) { const lm = el('button', 'btn-sm btn-ghost', 'Hitung data lama'); lm.id = 'hfLama'; lm.style.color = 'var(--ink)'; lm.title = 'Isi fee & honor untuk booking/tindakan bulan ini yang dicatat sebelum tarif diatur'; lm.onclick = hitungLama; ac.appendChild(lm); }
     if (own) { const tr = el('button', 'btn-sm', 'Atur tarif'); tr.id = 'hfTarif'; tr.onclick = tarif; ac.appendChild(tr); }
     h.appendChild(ac); kartu.appendChild(h);
     const p = el('p', null, own ? 'Lembur disetujui, fee close deal (dari tanggal booking diinput), dan honor tindakan (saat pasien selesai).' : d && d.peran === 'Dokter' ? 'Rekap honor tindakan Anda bulan ini.' : 'Rekap jumlah per orang (nominal hanya terlihat Owner).'); p.style.cssText = 'color:var(--mute);font-size:12.5px;margin:4px 0 8px'; kartu.appendChild(p);
@@ -42,6 +43,13 @@
     const baris = d.daftar.map(x => [x.nama, x.lembur].concat(nom ? [x.lemburRp] : [], [x.cd], nom ? [x.cdRp] : [], [x.dokterN], nom ? [x.dokterRp] : [], [x.asistenN], nom ? [x.asistenRp] : [], nom ? [x.total] : []));
     const csv = '﻿' + [kep].concat(baris).map(r => r.map(q).join(',')).join('\r\n');
     const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' })); a.download = 'honor-fee-' + d.bulan + '.csv'; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  }
+  async function hitungLama() {
+    const bln = H.bln || (H.d && H.d.bulan) || ym(), base = { bulan: bln, cab: S.cab }, z = await api('hitungDataLama', Object.assign({ simulasi: true }, base));
+    if (!z.success) { gagal(z); return; } const x = z.data;
+    if (!x.fee && !x.tindakan) { toast('Tidak ada data lama bulan ' + bln + ' yang perlu dihitung.'); return; }
+    if (!confirm('Hitung data lama bulan ' + bln + '?\n\n• ' + x.fee + ' booking: fee close deal ' + rp(x.rpFee) + ' (tarif ' + rp(x.tarifFee) + ' per booking)\n• ' + x.tindakan + ' tindakan selesai: honor dokter + asisten ' + rp(x.rpHonor) + '\n\nMemakai tarif saat ini. Setelah dihitung nominalnya terkunci dan tidak berubah bila tarif diganti.')) return;
+    const r = await api('hitungDataLama', base); if (!r.success) { gagal(r); return; } toast(r.message); pull(['hf'], true);
   }
   async function tarif() {
     const r = await api('getTarifHonor', {}); if (!r.success) { gagal(r); return; } const t = r.data;
