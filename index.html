@@ -35,19 +35,33 @@
     <div class="brand"><i class="bi bi-heart-pulse-fill" style="color:var(--teal)"></i> Khitan Prime<small id="who"></small></div>
     <div id="cabWrap" class="hide"><label for="cabSel" style="margin-top:0"><i class="bi bi-geo-alt"></i> Lokasi cabang</label><select id="cabSel" onchange="setCabang(this.value)"></select></div>
     <button class="nav active" data-s="dash" onclick="nav('dash')"><i class="bi bi-speedometer2"></i> Dashboard</button>
-    <button class="nav" data-s="daftar" onclick="nav('daftar')"><i class="bi bi-person-plus"></i> Pendaftaran</button>
-    <button class="nav" data-s="booking" onclick="nav('booking')"><i class="bi bi-calendar-check"></i> Pasien Booking</button>
-    <button class="nav" data-s="proses" onclick="nav('proses')"><i class="bi bi-clipboard2-pulse"></i> Pasien Diproses</button>
-    <button class="nav" data-s="stok" onclick="nav('stok')"><i class="bi bi-capsule"></i> Stok Obat &amp; BHP</button>
-    <button class="nav" data-s="kon" onclick="nav('kon')"><i class="bi bi-chat-dots"></i> Konsultasi Pasca Khitan <span id="konBadge" class="nbadge hide">0</span></button>
-    <button class="nav" data-s="tg" onclick="nav('tg')"><i class="bi bi-telegram"></i> Telegram</button>
+    <div class="ng" data-g="pasien">
+      <button class="nav ngh" type="button" aria-expanded="true" onclick="menuToggle('pasien')"><i class="bi bi-people"></i> Pasien <span class="nbadge hide" id="ngb-pasien">0</span><i class="bi bi-chevron-down ngc"></i></button>
+      <div class="nsub">
+        <button class="nav" data-s="daftar" onclick="nav('daftar')"><i class="bi bi-person-plus"></i> Pendaftaran</button>
+        <button class="nav" data-s="booking" onclick="nav('booking')"><i class="bi bi-calendar-check"></i> Pasien Booking</button>
+        <button class="nav" data-s="proses" onclick="nav('proses')"><i class="bi bi-clipboard2-pulse"></i> Pasien Selesai</button>
+        <button class="nav" data-s="kon" onclick="nav('kon')"><i class="bi bi-chat-dots"></i> Konsultasi <span id="konBadge" class="nbadge hide">0</span></button>
+      </div>
+    </div>
     <button class="nav" data-s="hv" onclick="nav('hv')"><i class="bi bi-house-heart"></i> Homevisite</button>
-    <button class="nav" data-s="kdp" onclick="nav('kdp')"><i class="bi bi-cash-stack"></i> Koreksi DP <span id="kdpBadge" class="nbadge hide">0</span></button>
-    <button class="nav" data-s="keu" onclick="nav('keu')"><i class="bi bi-cash-coin"></i> Keuangan</button>
-    <button class="nav" data-s="lap" onclick="nav('lap')"><i class="bi bi-bar-chart-line"></i> Laporan</button>
-    <button class="nav hide" id="navMaster" data-s="master" onclick="nav('master')"><i class="bi bi-buildings"></i> Cabang &amp; Paket</button>
-    <button class="nav hide" id="navStaff" data-s="staff" onclick="nav('staff')"><i class="bi bi-people"></i> Staff &amp; Akun</button>
-    <button class="nav hide" id="navProfil" onclick="konProfil()"><i class="bi bi-pen"></i> Profil &amp; TTD Dokter</button>
+    <button class="nav" data-s="stok" onclick="nav('stok')"><i class="bi bi-capsule"></i> Stok Obat &amp; BHP</button>
+    <div class="ng" data-g="lap">
+      <button class="nav ngh" type="button" aria-expanded="false" onclick="menuToggle('lap')"><i class="bi bi-bar-chart-line"></i> Laporan <i class="bi bi-chevron-down ngc"></i></button>
+      <div class="nsub">
+        <button class="nav" data-s="keu" onclick="nav('keu')"><i class="bi bi-cash-coin"></i> Keuangan</button>
+        <button class="nav" data-s="lap" onclick="nav('lap')"><i class="bi bi-bar-chart-line"></i> Laporan</button>
+      </div>
+    </div>
+    <div class="ng" data-g="set">
+      <button class="nav ngh" type="button" aria-expanded="false" onclick="menuToggle('set')"><i class="bi bi-gear"></i> Pengaturan <i class="bi bi-chevron-down ngc"></i></button>
+      <div class="nsub">
+        <button class="nav hide" id="navMaster" data-s="master" onclick="nav('master')"><i class="bi bi-buildings"></i> Cabang &amp; Paket</button>
+        <button class="nav hide" id="navStaff" data-s="staff" onclick="nav('staff')"><i class="bi bi-people"></i> Staff &amp; Akun</button>
+        <button class="nav" data-s="tg" onclick="nav('tg')"><i class="bi bi-telegram"></i> Telegram</button>
+        <button class="nav hide" id="navProfil" onclick="konProfil()"><i class="bi bi-pen"></i> Profil &amp; TTD Dokter</button>
+      </div>
+    </div>
     <button class="nav" onclick="toggleTheme()"><i class="bi bi-moon-stars"></i> Mode gelap</button>
     <button class="nav" style="margin-top:auto;color:var(--red)" onclick="doLogout()"><i class="bi bi-box-arrow-right"></i> Keluar</button>
   </aside>
@@ -89,12 +103,13 @@
 
     <section id="s-booking" class="sec-app">
       <h1><i class="bi bi-calendar-check"></i> Pasien Booking</h1>
+      <div class="tabs" id="tabsBk1" role="tablist"><button class="tab on" type="button" onclick="nav('booking')">Belum Diproses</button><button class="tab tab-kdp hide" type="button" onclick="nav('kdp')">Pengajuan DP <span id="kdpBadge" class="nbadge hide">0</span></button></div>
       <div class="card"><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px"><button class="btn-sm btn-ghost" style="color:var(--ink)" onclick="exportB()"><i class="bi bi-file-earmark-excel"></i> Export Excel</button><button class="btn-sm btn-wa" onclick="kirimWA()"><i class="bi bi-whatsapp"></i> Kirim daftar via WA</button></div><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;margin-bottom:10px"><div style="flex:1;min-width:140px"><label style="margin-top:0">Dari</label><input type="date" id="fbD" onchange="renderB()"></div><div style="flex:1;min-width:140px"><label style="margin-top:0">Sampai</label><input type="date" id="fbS" onchange="renderB()"></div><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn-sm btn-ghost" style="color:var(--ink)" onclick="clearRange('fb')"><i class="bi bi-x-circle"></i> Tampilkan Semua</button></div></div><input id="qB" placeholder="Cari nama / ID..." oninput="renderB()">
         <div class="tw" style="margin-top:8px"><table><thead><tr><th>ID</th><th>Nama Pasien</th><th>Orang Tua</th><th>No HP</th><th>Tanggal</th><th>Jam</th><th>Paket</th><th>DP</th><th>Sisa</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="tB"></tbody></table></div></div>
     </section>
 
     <section id="s-proses" class="sec-app">
-      <h1><i class="bi bi-clipboard2-pulse"></i> Pasien Diproses</h1>
+      <h1><i class="bi bi-clipboard2-pulse"></i> Pasien Selesai</h1>
       <div class="card"><div style="margin-bottom:8px"><button class="btn-sm btn-ghost" style="color:var(--ink)" onclick="exportP()"><i class="bi bi-file-earmark-excel"></i> Export Excel</button> <button class="btn-sm btn-wa" onclick="kirimWAP()"><i class="bi bi-whatsapp"></i> Kirim daftar via WA</button></div><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;margin-bottom:10px"><div style="flex:1;min-width:140px"><label style="margin-top:0">Dari</label><input type="date" id="fpD" onchange="renderP()"></div><div style="flex:1;min-width:140px"><label style="margin-top:0">Sampai</label><input type="date" id="fpS" onchange="renderP()"></div><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn-sm btn-ghost" style="color:var(--ink)" onclick="setMonth('fp')"><i class="bi bi-calendar-month"></i> Bulan Ini</button></div></div><input id="qP" placeholder="Cari nama / ID..." oninput="renderP()">
         <div class="tw" style="margin-top:8px"><table><thead><tr><th>ID</th><th>Nama Pasien</th><th>Orang Tua</th><th>Dokter</th><th>Asisten</th><th>Tanggal</th><th>Paket</th><th>Total Biaya</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="tP"></tbody></table></div></div>
     </section>
@@ -125,7 +140,7 @@
     <div class="card kon-r"><div id="konThread"><p class="kon-empty">Pilih percakapan di sebelah kiri.</p></div></div>
   </div></section>
 <section id="s-tg" class="sec-app"><h1><i class="bi bi-telegram"></i> Notifikasi Telegram</h1><div id="tgWrap"><p class="kon-empty">Memuat…</p></div></section>
-<section id="s-kdp" class="sec-app"><h1><i class="bi bi-cash-stack"></i> Koreksi DP</h1><div id="kdpWrap"><p class="kon-empty">Memuat…</p></div></section>
+<section id="s-kdp" class="sec-app"><h1><i class="bi bi-calendar-check"></i> Pasien Booking</h1><div class="tabs" id="tabsBk2" role="tablist"><button class="tab" type="button" onclick="nav('booking')">Belum Diproses</button><button class="tab on tab-kdp hide" type="button" onclick="nav('kdp')">Pengajuan DP</button></div><div id="kdpWrap"><p class="kon-empty">Memuat…</p></div></section>
 <section id="s-hv" class="sec-app"><h1><i class="bi bi-house-heart"></i> Homevisite</h1>
       <div class="card"><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;margin-bottom:10px"><div style="flex:1;min-width:140px"><label style="margin-top:0">Dari</label><input type="date" id="fhD" onchange="renderHv()"></div><div style="flex:1;min-width:140px"><label style="margin-top:0">Sampai</label><input type="date" id="fhS" onchange="renderHv()"></div><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn-sm btn-ghost" style="color:var(--ink)" onclick="clearRange('fh')"><i class="bi bi-x-circle"></i> Tampilkan Semua</button> <button class="btn-sm btn-ghost" style="color:var(--ink)" onclick="setMonth('fh')"><i class="bi bi-calendar-month"></i> Bulan Ini</button></div></div><div style="display:flex;gap:8px"><input id="qH" placeholder="Cari pasien / petugas..." oninput="renderHv()"><button style="white-space:nowrap" onclick="mHv()"><i class="bi bi-plus-lg"></i> Tambah</button></div>
         <div class="tw" style="margin-top:8px"><table><thead><tr><th>Tanggal</th><th>Pasien</th><th>Alamat</th><th>Petugas</th><th></th></tr></thead><tbody id="tH"></tbody></table></div></div></section>
@@ -162,5 +177,6 @@
 <script defer src="js/telegram.js?v=4.6.0"></script>
 <script defer src="js/koreksi.js?v=4.9.0"></script>
 <script defer src="js/ttd.js?v=4.10.0"></script>
+<script defer src="js/menu.js?v=4.11.0"></script>
 </body>
 </html>

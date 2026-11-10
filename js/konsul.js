@@ -25,7 +25,7 @@
   function konRender() {
     const box = $('konList'); if (!box) return; const q = ($('qKon').value || '').toLowerCase(); box.textContent = '';
     const rows = (S.kon.list || []).filter(x => !q || (x.nama + ' ' + x.ortu).toLowerCase().indexOf(q) > -1);
-    if (!rows.length) { box.appendChild(el('p', 'kon-empty', S.kon.list.length ? 'Tidak ada yang cocok.' : 'Belum ada percakapan. Buka menu "Pasien Diproses", lalu klik ikon percakapan pada pasien untuk membuat tautan.')); return; }
+    if (!rows.length) { box.appendChild(el('p', 'kon-empty', S.kon.list.length ? 'Tidak ada yang cocok.' : 'Belum ada percakapan. Buka menu "Pasien Selesai", lalu klik ikon percakapan pada pasien untuk membuat tautan.')); return; }
     rows.forEach(x => {
       const b = el('button', 'kon-it' + (x.id === KON.id ? ' on' : '') + (x.belum ? ' unread' : '')); b.type = 'button'; b.addEventListener('click', () => konBuka(x.id));
       const t = el('div', 'kon-top'); t.appendChild(el('b', null, x.nama)); t.appendChild(el('span', 'kon-t', x.waktu ? tgl(x.waktu) : '')); b.appendChild(t);

@@ -122,3 +122,16 @@ label i{color:var(--teal);margin-right:4px}
 
 .dv-box{max-height:65vh;overflow:auto;background:#CBD5E1;border-radius:10px;padding:6px;margin-top:8px;min-height:90px}.dv-box .pdfp{display:block;width:100%;height:auto;margin:0 0 8px;background:#fff;box-shadow:0 2px 8px rgba(15,23,42,.25)}.dv-load{padding:26px 10px;text-align:center;color:#334155;font-size:13px}
 .dv-act{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;margin-top:12px}.dv-act button{flex:0 0 auto}.btn-wa{background:#25D366!important;color:#fff!important}
+
+/* ===== Menu berkelompok (v4.11) ===== */
+.ng{display:flex;flex-direction:column;gap:2px}.ng.hide{display:none}
+.ngh{font-weight:700}.ngh .ngc{margin-left:auto;width:auto;font-size:.8em;transition:transform .15s}.ngh .nbadge{margin-left:8px}
+.ngh .nbadge+.ngc{margin-left:8px}.ng.closed .ngc{transform:rotate(-90deg)}
+.nsub{display:flex;flex-direction:column;gap:2px;margin-left:18px;padding-left:6px;border-left:2px solid var(--line)}.ng.closed .nsub{display:none}
+.nsub .nav{min-height:36px}
+.ng.has-act>.ngh{color:var(--navy)}
+.tabs{display:flex;gap:6px;margin:6px 0 12px;flex-wrap:wrap}.tabs.hide{display:none}
+.tab{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:99px;padding:6px 14px;font-size:13px;font-weight:600;display:inline-flex;align-items:center;gap:6px;box-shadow:none}
+.tab.on{background:var(--teal);border-color:var(--teal);color:#fff}.tab:hover{box-shadow:none;background:var(--cyl);color:var(--ink)}.tab.on:hover{background:var(--teal);color:#fff}
+.tab .nbadge{margin-left:0}
+@media(max-width:820px){.ng{width:100%}.nsub{margin-left:12px}}
