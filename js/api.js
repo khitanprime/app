@@ -25,7 +25,7 @@ const READ_ACTIONS = /^(ping|login|boot|batch|get[A-Z]\w*)$/;
 const ARGS = {
   login: ['u', 'p', 'range'], getBootstrap: ['cab'], getDashboard: ['cab'], getBookings: ['cab', 'status'], getStok: ['cab', 'tipe'],
   getDokumen: ['cab'], getHomevisit: ['cab'], getKeuangan: ['cab', 'dari', 'sampai'], getLaporan: ['cab', 'dari', 'sampai'], getMaster: [], getAdminStaff: [],
-  createBooking: '*', prosesBooking: ['id', 'dokter', 'asisten', 'items'], rescheduleBooking: ['id', 'tgl', 'jam'], ubahBooking: ['id', 'd'],
+  createBooking: '*', prosesBooking: ['id', 'dokter', 'asisten', 'items', 'lewati'], rescheduleBooking: ['id', 'tgl', 'jam'], ubahBooking: ['id', 'd'],
   pelunasan: ['id', 'metode'], deleteBooking: ['id'], addStok: ['cab', 'tipe', 'nama', 'awal'], ubahStok: ['tipe', 'id', 'aksi', 'jml'], hapusStok: ['tipe', 'id'],
   addPengeluaran: ['cab', 'tgl', 'ket', 'jml'], hapusPengeluaran: ['id'], addHomevisit: ['cab', 'o'], hapusHomevisit: ['id'],
   saveTtd: ['id', 'dataUrl'], cetak: ['id', 'jenis'], saveCabang: ['o'], savePaket: ['o'], saveStaff: ['o'], hapusStaff: ['nama', 'role'],
