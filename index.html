@@ -46,6 +46,7 @@
     </div>
     <button class="nav" data-s="hv" onclick="nav('hv')"><i class="bi bi-house-heart"></i> Homevisite</button>
     <button class="nav" data-s="stok" onclick="nav('stok')"><i class="bi bi-capsule"></i> Stok Obat &amp; BHP</button>
+    <button class="nav hide" id="navLembur" data-s="lembur" onclick="nav('lembur')"><i class="bi bi-alarm"></i> Pengajuan Lembur <span id="lbrBadge" class="nbadge hide">0</span></button>
     <div class="ng" data-g="lap">
       <button class="nav ngh" type="button" aria-expanded="false" onclick="menuToggle('lap')"><i class="bi bi-bar-chart-line"></i> Laporan <i class="bi bi-chevron-down ngc"></i></button>
       <div class="nsub">
@@ -140,6 +141,7 @@
     <div class="card kon-r"><div id="konThread"><p class="kon-empty">Pilih percakapan di sebelah kiri.</p></div></div>
   </div></section>
 <section id="s-tg" class="sec-app"><h1><i class="bi bi-telegram"></i> Notifikasi Telegram</h1><div id="tgWrap"><p class="kon-empty">Memuat…</p></div></section>
+<section id="s-lembur" class="sec-app"><h1><i class="bi bi-alarm"></i> Pengajuan Lembur</h1><div id="lbrWrap"><p class="kon-empty">Memuat…</p></div></section>
 <section id="s-kdp" class="sec-app"><h1><i class="bi bi-calendar-check"></i> Pasien Booking</h1><div class="tabs" id="tabsBk2" role="tablist"><button class="tab" type="button" onclick="nav('booking')">Belum Diproses</button><button class="tab on tab-kdp hide" type="button" onclick="nav('kdp')">Pengajuan DP</button></div><div id="kdpWrap"><p class="kon-empty">Memuat…</p></div></section>
 <section id="s-hv" class="sec-app"><h1><i class="bi bi-house-heart"></i> Homevisite</h1>
       <div class="card"><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;margin-bottom:10px"><div style="flex:1;min-width:140px"><label style="margin-top:0">Dari</label><input type="date" id="fhD" onchange="renderHv()"></div><div style="flex:1;min-width:140px"><label style="margin-top:0">Sampai</label><input type="date" id="fhS" onchange="renderHv()"></div><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn-sm btn-ghost" style="color:var(--ink)" onclick="clearRange('fh')"><i class="bi bi-x-circle"></i> Tampilkan Semua</button> <button class="btn-sm btn-ghost" style="color:var(--ink)" onclick="setMonth('fh')"><i class="bi bi-calendar-month"></i> Bulan Ini</button></div></div><div style="display:flex;gap:8px"><input id="qH" placeholder="Cari pasien / petugas..." oninput="renderHv()"><button style="white-space:nowrap" onclick="mHv()"><i class="bi bi-plus-lg"></i> Tambah</button></div>
@@ -177,6 +179,7 @@
 <script defer src="js/telegram.js?v=4.6.0"></script>
 <script defer src="js/koreksi.js?v=4.9.0"></script>
 <script defer src="js/ttd.js?v=4.10.0"></script>
-<script defer src="js/menu.js?v=4.11.0"></script>
+<script defer src="js/lembur.js?v=4.12.0"></script>
+<script defer src="js/menu.js?v=4.12.0"></script>
 </body>
 </html>
