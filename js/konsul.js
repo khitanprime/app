@@ -121,7 +121,7 @@
     const pro = el('div', 'rx-pro'); pro.appendChild(el('span', 'rx-pl', 'Pro:')); pro.appendChild(el('span', null, d.nama + (d.usia ? ' (' + d.usia + ')' : '') + (d.bb ? ' · BB ' + d.bb + (/kg/i.test(d.bb) ? '' : ' kg') : ''))); c.appendChild(pro);
     const bt = el('div', 'rx-bt'); bt.appendChild(el('small', 'rx-v', 'Kode: ' + d.kode + ' · ' + d.id));
     const sg = el('div', 'rx-s'); if (d.ttd) { const im = el('img'); im.src = d.ttd; im.alt = 'Tanda tangan'; sg.appendChild(im); } else sg.appendChild(el('div', 'rx-sp')); sg.appendChild(el('b', 'rx-dn', d.dokter)); sg.appendChild(el('small', null, 'SIP: ' + d.sip)); bt.appendChild(sg); c.appendChild(bt);
-    c.appendChild(el('div', 'rx-foot', 'Resep ini dapat ditebus di klinik Khitan Prime (GRATIS) atau apotek terdekat.'));
+    c.appendChild(el('div', 'rx-foot', 'Resep ini dapat ditebus di Klinik Khitan Prime (gratis) atau dibeli di apotek terdekat'));
     if (d.status === 'Aktif' && isDokter()) { const x = el('button', 'btn-sm btn-red', 'Batalkan resep'); x.type = 'button'; x.addEventListener('click', () => { if (confirm('Batalkan resep ' + d.id + '? Pasien akan melihat resep ini dibatalkan.')) call('konsulResepBatal', { id: KON.id, rid: d.id }, () => { toast('Resep dibatalkan'); KON.idle = 0; clearTimeout(KON.timer); KON.busy = false; fetchThread(false); }); }); c.appendChild(x); }
     return c;
   }
