@@ -109,7 +109,7 @@
       <h1><i class="bi bi-calendar-check"></i> Pasien Booking</h1>
       <div class="tabs" id="tabsBk1" role="tablist"><button class="tab on" type="button" onclick="nav('booking')">Belum Diproses</button><button class="tab tab-kdp hide" type="button" onclick="nav('kdp')">Pengajuan DP <span id="kdpBadge" class="nbadge hide">0</span></button></div>
       <div class="card"><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px"><button class="btn-sm btn-ghost" style="color:var(--ink)" onclick="exportB()"><i class="bi bi-file-earmark-excel"></i> Export Excel</button><button class="btn-sm btn-wa" onclick="kirimWA()"><i class="bi bi-whatsapp"></i> Kirim daftar via WA</button></div><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;margin-bottom:10px"><div style="flex:1;min-width:140px"><label style="margin-top:0">Dari</label><input type="date" id="fbD" onchange="renderB()"></div><div style="flex:1;min-width:140px"><label style="margin-top:0">Sampai</label><input type="date" id="fbS" onchange="renderB()"></div><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn-sm btn-ghost" style="color:var(--ink)" onclick="clearRange('fb')"><i class="bi bi-x-circle"></i> Tampilkan Semua</button></div></div><input id="qB" placeholder="Cari nama / ID..." oninput="renderB()">
-        <div class="tw" style="margin-top:8px"><table><thead><tr><th>ID</th><th>Nama Pasien</th><th>Orang Tua</th><th>No HP</th><th>Tanggal</th><th>Jam</th><th>Paket</th><th>DP</th><th>Sisa</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="tB"></tbody></table></div></div>
+        <div class="tw" style="margin-top:8px"><table><thead><tr><th>ID</th><th>Nama Pasien</th><th>Usia</th><th>BB</th><th>Orang Tua</th><th>No HP</th><th>Tanggal</th><th>Jam</th><th>Paket</th><th>DP</th><th>Sisa</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="tB"></tbody></table></div></div>
     </section>
 
     <section id="s-proses" class="sec-app">
@@ -174,7 +174,7 @@
 
 <script defer src="js/config.js?v=4.6.0"></script>
 <script defer src="js/api.js?v=4.6.0"></script>
-<script defer src="js/app.js?v=4.6.0"></script>
+<script defer src="js/app.js?v=4.15.0"></script>
 <script defer src="js/combo.js?v=4.6.0"></script>
 <script defer src="js/konsul.js?v=4.13.3"></script>
 <script defer src="js/pdfview.js?v=4.6.0"></script>

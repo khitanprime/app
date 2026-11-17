@@ -174,7 +174,7 @@ function renderPB() {
       return '<div style="display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line)">' +
         '<span style="font-size:20px;line-height:1.2;color:' + (ok ? '#15803D' : '#B45309') + '"><i class="bi ' + (ok ? 'bi-check-circle-fill' : 'bi-hourglass-split') + '"></i></span>' +
         '<div style="flex:1;min-width:0"><b>' + esc(b.NamaAnak) + '</b> <span class="badge ' + (ok ? 'b-ok' : 'b-wait') + '">' + (ok ? 'Selesai' : 'Booking menunggu') + '</span>' +
-        '<div style="font-size:12px;color:var(--mute)">' + esc(b.NamaOrtu || '-') + ' · ' + tgl_(b.Tanggal) + ' ' + esc(b.Jam || '') + ' · ' + esc(b.NamaPaket) + '</div></div>' +
+        '<div style="font-size:12px;color:var(--mute)">' + esc(b.NamaOrtu || '-') + (b.Usia ? ' · ' + esc(b.Usia) : '') + (b.BeratBadan ? ' · ' + esc(b.BeratBadan) : '') + ' · ' + tgl_(b.Tanggal) + ' ' + esc(b.Jam || '') + ' · ' + esc(b.NamaPaket) + '</div></div>' +
         (w ? '<a class="btn btn-wa btn-sm" target="_blank" rel="noopener" href="' + w + '" title="Chat orang tua"><i class="bi bi-whatsapp"></i></a>' : '') + '</div>'; }).join('') || '<div style="color:var(--mute);padding:12px 0">Tidak ada data.</div>') + '</div>' +
     '<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;margin-top:12px"><button class="btn-sm btn-ghost" style="color:var(--ink)" onclick="closeM()"><i class="bi bi-x-lg"></i> Tutup</button>' +
     '<button class="btn-sm btn-ghost" style="color:var(--ink)" onclick="salinPB()"><i class="bi bi-clipboard"></i> Salin teks</button>' +
@@ -184,7 +184,7 @@ function teksPB() { // teks daftar sesuai filter aktif; emoji ditulis sebagai ko
   const v = pbVis(); if (!v.length) return '';
   const judul = { all: 'Semua', done: 'Selesai', wait: 'Booking Menunggu' }[PB.f];
   return ['*Data Pasien ' + PB.label + ' \u2014 ' + judul + ' (' + v.length + ')*', ''].concat(v.map((b, i) =>
-    (i + 1) + '. ' + (b.Status === 'Selesai' ? '\u2705' : '\u23F3') + ' ' + b.NamaAnak + ' - ' + tgl_(b.Tanggal) + ' ' + (b.Jam || '') + ' - ' + b.NamaPaket)).join('\n');
+    (i + 1) + '. ' + (b.Status === 'Selesai' ? '\u2705' : '\u23F3') + ' ' + b.NamaAnak + (b.Usia || b.BeratBadan ? ' (' + [b.Usia, b.BeratBadan].filter(Boolean).join(', ') + ')' : '') + ' - ' + tgl_(b.Tanggal) + ' ' + (b.Jam ? '*' + b.Jam + '*' : '') + ' - ' + b.NamaPaket)).join('\n');
 }
 function kirimWaPB() { // buka WhatsApp tanpa nomor tujuan: pilih sendiri kontaknya
   const t = teksPB(); if (!t) { toast('Tidak ada data'); return; }
@@ -268,8 +268,8 @@ function mAksi(id) {
 const hit_ = (b, q) => !q || (b.NamaAnak + ' ' + b.ID).toLowerCase().indexOf(q.toLowerCase()) > -1;
 function renderB() {
   const rows = S.bk.filter(b => b.Status === 'Belum Diproses' && hit_(b, $('qB').value) && inRange(b.Tanggal, 'fb'));
-  $('tB').innerHTML = rows.map(b => '<tr><td style="color:var(--navy);font-weight:700">' + esc(b.ID) + '</td><td><b>' + esc(b.NamaAnak) + '</b></td><td>' + esc(b.NamaOrtu) + '</td><td>' + esc(b.NoHP || '-') + '</td><td>' + esc(b.Tanggal) + '</td><td>' + esc(b.Jam) + '</td><td>' + esc(b.NamaPaket) +
-    '</td><td>' + rp(b.DP) + '</td><td>' + rp(b.Sisa) + '</td><td><span class="badge b-wait">Belum Diproses</span></td><td><div class="act">' + waBtn(b) + '<button class="btn-sm btn-navy" onclick="mProses(\'' + b.ID + '\')"><i class="bi bi-check2-square"></i> Proses</button>' + moreBtn(b.ID) + '</div></td></tr>').join('') || '<tr><td colspan="11" style="color:var(--mute)">Tidak ada data.</td></tr>';
+  $('tB').innerHTML = rows.map(b => '<tr><td style="color:var(--navy);font-weight:700">' + esc(b.ID) + '</td><td><b>' + esc(b.NamaAnak) + '</b></td><td>' + esc(b.Usia || '-') + '</td><td>' + esc(b.BeratBadan || '-') + '</td><td>' + esc(b.NamaOrtu) + '</td><td>' + esc(b.NoHP || '-') + '</td><td>' + esc(b.Tanggal) + '</td><td>' + esc(b.Jam) + '</td><td>' + esc(b.NamaPaket) +
+    '</td><td>' + rp(b.DP) + '</td><td>' + rp(b.Sisa) + '</td><td><span class="badge b-wait">Belum Diproses</span></td><td><div class="act">' + waBtn(b) + '<button class="btn-sm btn-navy" onclick="mProses(\'' + b.ID + '\')"><i class="bi bi-check2-square"></i> Proses</button>' + moreBtn(b.ID) + '</div></td></tr>').join('') || '<tr><td colspan="13" style="color:var(--mute)">Tidak ada data.</td></tr>';
 }
 function renderP() {
   const rows = S.bk.filter(b => b.Status === 'Selesai' && hit_(b, $('qP').value) && inRange(b.TanggalProses, 'fp'));
